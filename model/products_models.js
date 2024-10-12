@@ -6,6 +6,31 @@ const generateTrackingId = () => {
     return Math.floor(1000 * Math.random() * number).toString().slice(0, 5);
 }
 
+const menSchema = new mongoose.Schema({
+    shirt: String,
+    pants: String,
+    hoodiesAndSweaterShirt: String,
+    jeans: String,
+    underwear: String,
+    sportwear: String,
+    socks: String,
+    shoes: String,
+    sandals: String,
+})
+const womenSchema = new mongoose.Schema({
+    women: {
+        shirt: String,
+        pants: String,
+        hoodiesAndSweaterShirt: String,
+        jeans: String,
+        underwear: String,
+        sportwear: String,
+        socks: String,
+        shoes: String,
+        sandals: String,
+    }
+})
+
 var productsSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -44,6 +69,16 @@ var productsSchema = new mongoose.Schema({
         unique: true,
         default : generateTrackingId
     },
+    size: {
+        type:String
+    },
+    womensWear: {
+        type:String
+    },
+    menswear: {
+        type: String
+    },
+
 }, {timestamps: true});
 
 const Products = mongoose.model('product', productsSchema);
