@@ -72,11 +72,8 @@ var productsSchema = new mongoose.Schema({
     size: {
         type:[]
     },
-    womensWear: {
+    gender: {
         type:String
-    },
-    menswear: {
-        type: String
     },
 
 }, {timestamps: true});
