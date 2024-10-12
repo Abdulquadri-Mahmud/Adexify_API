@@ -70,7 +70,7 @@ var productsSchema = new mongoose.Schema({
         default : generateTrackingId
     },
     size: {
-        type:String
+        type:[]
     },
     womensWear: {
         type:String
