@@ -5,6 +5,7 @@ import cors from 'cors';
 
 import productsRoutes from './routes/products_routes.js';
 import userAuthentication from './routes/user_routes.js';
+import adminAuthentication from './routes/admin_auth_routes.js';
 import cookieParser from 'cookie-parser';
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.get("/",(req, res,) => {
 
 app.use('/api/products', productsRoutes);
 app.use('/api/user/auth', userAuthentication);
+app.use('/api/admin/auth', adminAuthentication);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
