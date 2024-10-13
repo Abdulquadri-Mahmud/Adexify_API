@@ -13,6 +13,6 @@ app.patch('/update/:id', updateUser);
 app.delete('/delete/:id', deleteAccount);
 app.get('/all-user', allUsers);
 app.post('/user-forgot-password', userForgotPassword);
-app.post('/user-reset-password', userResetPassword);
+app.post('/user-reset-password/:token', userResetPassword);
 
 export default app;
