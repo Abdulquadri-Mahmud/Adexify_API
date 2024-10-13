@@ -2,7 +2,7 @@ import User from "../model/user_model.js";
 import bcryptjs from 'bcryptjs';
 import { errorHandler } from "../utils/errorHandler.js";
 import jwt from 'jsonwebtoken';
-import mongoose from "mongoose";
+import crypto from 'crypto';
 
 export const signup = async (req, res, next) => {
     const { firstname, lastname, phone, email, address, password, avatar} = req.body;
