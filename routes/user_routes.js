@@ -12,7 +12,7 @@ app.get('/signout', signOut);
 app.patch('/update/:id', updateUser);
 app.delete('/delete/:id', deleteAccount);
 app.get('/all-user', allUsers);
-app.post('/user-forgot-password', userForgotPassword);
-app.post('/user-reset-password/:token', userResetPassword);
+app.post('/forgot-password', userForgotPassword);
+app.post('/reset-password/:token', userResetPassword);
 
 export default app;
