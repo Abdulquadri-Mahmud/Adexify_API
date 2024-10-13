@@ -46,7 +46,7 @@ export const AdminLogin = async (req, res, next) => {
         const isMatch = bcryptjs.compareSync(password, admin.password);
 
         if (!isMatch) {
-            return next(errorHandler(400, 'Invalid credentials'))
+            return next(errorHandler(400, 'Wrong credentials'))
         }
 
         // Generate JWT token
@@ -100,7 +100,7 @@ export const forgotPassword = async (req, res, next) => {
             subject: 'Password Reset Request',
             text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
             Please click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\n
-            http://${req.headers.host}/reset-password/${token}\n\n
+            http://localhost:5173/admin-login/forgot-password/reset-pssword/${token}\n\n
             If you did not request this, please ignore this email and your password will remain unchanged.\n`
         };
 
