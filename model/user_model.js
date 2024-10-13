@@ -29,6 +29,14 @@ var userSchema = new mongoose.Schema({
     },
     avatar : {
         type: String,
+    },
+    resetPasswordToken: {
+        type: String,
+        default: ''
+    },
+    resetPasswordExpires: {
+        type: Date,
+        default: ''
     }
 }, {timestamps: true});
 
