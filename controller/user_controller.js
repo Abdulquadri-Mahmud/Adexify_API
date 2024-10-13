@@ -3,6 +3,7 @@ import bcryptjs from 'bcryptjs';
 import { errorHandler } from "../utils/errorHandler.js";
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 export const signup = async (req, res, next) => {
     const { firstname, lastname, phone, email, address, password, avatar} = req.body;
