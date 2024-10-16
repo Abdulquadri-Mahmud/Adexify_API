@@ -4,12 +4,12 @@ import { errorHandler } from "../utils/errorHandler.js";
 
 export const createProducts = async (req, res, next) => {
     const { name, stock, deal,category, price, 
-        discount,oldprice, image, description, discountType, size, } = req.body;
+        discount,oldprice, image, description, gender, discountType, size, } = req.body;
 
     try {
         const products = new Products ({
             name, stock, deal,category, price, discount,oldprice, image,
-            description, discountType, size,
+            description, gender, discountType, size,
         });
 
         await products.save();
