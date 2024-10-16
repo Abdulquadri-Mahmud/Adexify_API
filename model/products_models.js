@@ -62,7 +62,7 @@ var productsSchema = new mongoose.Schema({
     },
     image: {
         type: [],
-        // required: true
+        required: true
     },
     description: {
         type: String,
@@ -77,10 +77,12 @@ var productsSchema = new mongoose.Schema({
         default : generateTrackingId
     },
     size: {
-        type:[]
+        type:[],
+        required: true
     },
     gender: {
-        type:String
+        type:String,
+        required: true
     },
 
 }, {timestamps: true});
