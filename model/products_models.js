@@ -36,13 +36,17 @@ var productsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    quantity: {
+    stock: {
         type: Number,
         required: true
     },
     price: {
         type: Number,
         required: true
+    },
+    discount: {
+        type: Number,
+        // required: true
     },
     oldprice: {
         type: Number,
@@ -63,6 +67,9 @@ var productsSchema = new mongoose.Schema({
     description: {
         type: String,
         required: true
+    },
+    discountType: {
+        type: String,
     },
     trackingId : {
         type: String,
