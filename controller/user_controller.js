@@ -16,9 +16,9 @@ export const signup = async (req, res, next) => {
         //     return next(errorHandler(400, 'Phone Number has been used by another user!'));
         // }
         
-        if (validEmail) {
-            return next(errorHandler(400, 'Email has been used by another user!'));
-        }
+        // if (validEmail) {
+        //     return next(errorHandler(400, 'Email has been used by another user!'));
+        // }
         
         if (password.length <= 7) {
             return next(errorHandler(400, 'Please kindly choose a strong password! max(8)'));
