@@ -9,12 +9,12 @@ export const signup = async (req, res, next) => {
     const { firstname, lastname, phone, email, address, password, avatar} = req.body;
 
     try {
-        const validPhone = User.findOne({phone});
+        // const validPhone = User.findOne({phone});
         const validEmail = User.findOne({email});
 
-        if (validPhone) {
-            return next(errorHandler(400, 'Phone Number has been used by another user!'));
-        }
+        // if (validPhone) {
+        //     return next(errorHandler(400, 'Phone Number has been used by another user!'));
+        // }
         
         if (validEmail) {
             return next(errorHandler(400, 'Email has been used by another user!'));
