@@ -96,3 +96,40 @@ export const updateProduct = async (req, res, next) => {
         next(error)
     }
 }
+
+export const searchProduct = async (req, res, next) => {
+    try {
+        const limit = parseInt(req.query.limit) || 9;
+
+        const startIndex = parseInt(req.query.startIndex) || 0;
+
+        const searchTerm = req.query.searchTerm || '';
+
+        const name = req.query.name || '';
+
+        const price = req.query.price || '';
+
+        const category = req.query.category || '';
+
+        const gender = req.query.gender || '';
+
+        let sort = req.query.sort || 'createdAt';
+
+        let order = req.query.order || 'desc';
+
+        // get cars 
+        const getProducts = await Products.find({
+            name: { $regex: searchTerm, $options: 'i'},
+            price: { $regex: price, $options: 'i'},
+            category: { $regex: category, $options: 'i'},
+            gender: { $regex: gender, $options: 'i'},
+        }).sort({
+            [sort]: order
+        }).limit(limit).skip(startIndex);
+
+        return res.status(200).json(getProducts);
+
+    } catch (error) {
+        next(error)
+    }
+}

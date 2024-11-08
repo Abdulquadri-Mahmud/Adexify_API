@@ -16,22 +16,22 @@ export const signup = async (req, res, next) => {
         //     return next(errorHandler(400, 'Phone Number has been used by another user!'));
         // }
         
-        // if (validEmail) {
-        //     return next(errorHandler(400, 'Email has been used by another user!'));
-        // }
         
         if (password.length <= 7) {
             return next(errorHandler(400, 'Please kindly choose a strong password! max(8)'));
         }
 
+        if (!validEmail) {
+            const hashedPassword = bcryptjs.hashSync(password, 10);
+            
+            const newUser = new User({firstname, lastname, phone,address, email, password: hashedPassword, avatar});
+            
+            await newUser.save();
+            
+            res.status(201).json('Account created successfully!');
+        }
+        next(errorHandler(400, 'Email has been used by another user!'));
 
-        const hashedPassword = bcryptjs.hashSync(password, 10);
-
-        const newUser = new User({firstname, lastname, phone,address, email, password: hashedPassword, avatar});
-
-        await newUser.save();
-
-        res.status(201).json('Account created successfully!');
     } catch (error) {
         next(error);
     }
