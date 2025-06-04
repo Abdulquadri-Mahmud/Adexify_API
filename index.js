@@ -6,6 +6,8 @@ import cors from 'cors';
 import productsRoutes from './routes/products_routes.js';
 import userAuthentication from './routes/user_routes.js';
 import adminAuthentication from './routes/admin_auth_routes.js';
+import allProductsRoutes from './routes/AllProducts.routes.js';
+
 import cookieParser from 'cookie-parser';
 
 dotenv.config()
@@ -50,6 +52,7 @@ app.get("/",(req, res,) => {
     res.send('Hello World');
 });
 
+app.use('/api/all-products', allProductsRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/user/auth', userAuthentication);
 app.use('/api/admin/auth', adminAuthentication);
