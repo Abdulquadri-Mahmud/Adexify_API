@@ -19,7 +19,7 @@ app.use(cors());
 app.use(cookieParser());
 
 const allowedOrigins = [
-    'https://adexify-online-shopping.vercel.app',
+    'https://adexify-five.vercel.app',
     'http://localhost:5173',
 ];
 
