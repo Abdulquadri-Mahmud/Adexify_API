@@ -7,10 +7,10 @@ import productsRoutes from './routes/products_routes.js';
 import userAuthentication from './routes/user_routes.js';
 import adminAuthentication from './routes/admin_auth_routes.js';
 import allProductsRoutes from './routes/AllProducts.routes.js';
-
+import CartRoutes from './routes/cart_routes.js';
 import cookieParser from 'cookie-parser';
 
-dotenv.config()
+dotenv.config();
 
 const app = express();
 
@@ -56,6 +56,7 @@ app.use('/api/all-products', allProductsRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/user/auth', userAuthentication);
 app.use('/api/admin/auth', adminAuthentication);
+app.use('/api/cart', CartRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
