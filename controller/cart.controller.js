@@ -6,8 +6,8 @@ import User from "../model/user_model.js";
 export const addToCart = async (req, res) => {
   const { userId, product } = req.body;
 
+  // Validate user
   const findUser = await User.findById(userId);
-
   if (!findUser) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
@@ -20,15 +20,43 @@ export const addToCart = async (req, res) => {
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
-      cart = new Cart({ userId: new mongoose.Types.ObjectId(userId), products: [product] });
+      // Create new cart
+      cart = new Cart({
+        userId: new mongoose.Types.ObjectId(userId),
+        products: [product],
+      });
     } else {
+      // Check if product already exists
+      const alreadyExists = cart.products.some(
+        (p) =>
+          p.productId === product.productId &&
+          p.selectedSize === product.selectedSize
+      );
+
+      if (alreadyExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Product already exists in cart',
+        });
+      }
+
+      // Add new product to cart
       cart.products.push(product);
     }
 
     const saved = await cart.save();
-    res.status(200).json({ success: true, message: "Product added to cart", cart: saved });
+
+    res.status(200).json({
+      success: true,
+      message: 'Product added to cart',
+      cart: saved,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message,
+    });
   }
 };
 
@@ -67,7 +95,7 @@ export const getUserCart = async (req, res) => {
 
 // ==================== Update Cart Item ====================
 export const updateCartItem = async (req, res) => {
-  const { userId, productId, quantity, selectedSize } = req.body;
+  const { userId, productId, quantity, size } = req.body;
 
   try {
     const findUser = await User.findById(userId);
@@ -84,7 +112,7 @@ export const updateCartItem = async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: "Product not found in cart" });
 
     if (quantity !== undefined) item.quantity = quantity;
-    if (selectedSize !== undefined) item.selectedSize = selectedSize;
+    if (size !== undefined) item.size = size;
 
     const updated = await cart.save();
 
