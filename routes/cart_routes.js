@@ -4,7 +4,7 @@ import { addToCart, deleteCartItem, getUserCart, updateCartItem } from '../contr
 const app = express();
 
 app.post('/add', addToCart);
-app.get('/get-user-cart', getUserCart);
+app.post('/get-user-cart', getUserCart);
 app.patch('/update-user-cart', updateCartItem);
 app.delete('/delete-cart-item', deleteCartItem);
 
