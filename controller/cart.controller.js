@@ -95,7 +95,7 @@ export const getUserCart = async (req, res) => {
 
 // ==================== Update Cart Item ====================
 export const updateCartItem = async (req, res) => {
-  const { userId, productId, quantity, size } = req.body;
+  const { userId, productId, quantity, selectedSize } = req.body;
 
   try {
     const findUser = await User.findById(userId);
@@ -112,7 +112,7 @@ export const updateCartItem = async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: "Product not found in cart" });
 
     if (quantity !== undefined) item.quantity = quantity;
-    if (size !== undefined) item.size = size;
+    if (selectedSize !== undefined) item.selectedSize = selectedSize;
 
     const updated = await cart.save();
 
