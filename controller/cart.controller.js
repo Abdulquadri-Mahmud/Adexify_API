@@ -128,13 +128,18 @@ export const updateCartItem = async (req, res) => {
 
 // ==================== Delete Cart Item ====================
 export const deleteCartItem = async (req, res) => {
-  const { userId, productId } = req.body;
+  const { userId, productId, selectedSize } = req.body;
 
   try {
     const cart = await Cart.findOne({ userId });
-    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+    if (!cart) {
+      return res.status(404).json({ success: false, message: "Cart not found" });
+    }
 
-    cart.products = cart.products.filter(item => item.productId !== productId);
+    // Filter out the item that matches BOTH productId and selectedSize
+    cart.products = cart.products.filter(
+      (item) => !(item.productId === productId && item.selectedSize === selectedSize)
+    );
 
     const updated = await cart.save();
     res.status(200).json({ success: true, message: "Item removed", cart: updated });
