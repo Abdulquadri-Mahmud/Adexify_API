@@ -147,3 +147,41 @@ export const deleteCartItem = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
+// Merge guest cart with user's cart
+export const mergeCart = async (req, res) => {
+  try {
+    const { userId, products } = req.body;
+
+    if (!userId || !Array.isArray(products)) {
+      return res.status(400).json({ message: "Invalid request data" });
+    }
+
+    // Find user cart
+    let userCart = await Cart.findOne({ userId });
+
+    if (!userCart) {
+      // If user has no cart, just create new with guest cart items
+      userCart = await Cart.create({ userId, products });
+    } else {
+      // Merge products
+      products.forEach((guestItem) => {
+        const existing = userCart.products.find(
+          (p) => p.productId.toString() === guestItem.productId
+        );
+        if (existing) {
+          existing.quantity += guestItem.quantity; // increment if exists
+        } else {
+          userCart.products.push(guestItem); // add new product
+        }
+      });
+
+      await userCart.save();
+    }
+
+    return res.status(200).json({ message: "Cart merged successfully", cart: userCart });
+  } catch (error) {
+    console.error("Merge Cart Error:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

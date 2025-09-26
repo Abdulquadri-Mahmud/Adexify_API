@@ -24,5 +24,13 @@
   },
   "keywords": [],
   "devDependencies": {},
-  "description": ""
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abdulquadri-Mahmud/Adexify_API.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Abdulquadri-Mahmud/Adexify_API/issues"
+  },
+  "homepage": "https://github.com/Abdulquadri-Mahmud/Adexify_API#readme"
 }
