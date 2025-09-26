@@ -136,10 +136,16 @@ export const deleteCartItem = async (req, res) => {
       return res.status(404).json({ success: false, message: "Cart not found" });
     }
 
-    // Filter out the item that matches BOTH productId and selectedSize
-    cart.products = cart.products.filter(
-      (item) => !(item.productId === productId && item.selectedSize === selectedSize)
-    );
+    // Filter logic
+    cart.products = cart.products.filter((item) => {
+      // If the item has no size, delete by productId only
+      if (!item.selectedSize) {
+        return item.productId !== productId;
+      }
+
+      // If the item has size, match both productId and selectedSize
+      return !(item.productId === productId && item.selectedSize === selectedSize);
+    });
 
     const updated = await cart.save();
     res.status(200).json({ success: true, message: "Item removed", cart: updated });
