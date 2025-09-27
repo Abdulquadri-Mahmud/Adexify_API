@@ -1,6 +1,5 @@
-import Product from "../models/Product.js";
-import User from "../models/User.js";
-import Order from "../models/Order.js";
+
+import Products from "../model/products_models.js";
 
 /**
  * Search Controller
@@ -67,12 +66,12 @@ export const searchController = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // ✅ Query DB
-    const results = await Model.find(searchCondition)
+    const results = await Products.find(searchCondition)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await Model.countDocuments(searchCondition);
+    const total = await Products.countDocuments(searchCondition);
 
     // ✅ Highlight matches
     let highlightedResults = results.map((item) => {
