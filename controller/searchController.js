@@ -1,40 +1,31 @@
-
 import Products from "../model/products_models.js";
+// import User from "../model/userModel.js";
+// import Order from "../model/orderModel.js";
 
-/**
- * Search Controller
- * Supports: 
- * - Multiple collections (products, users, orders)
- * - Partial search (regex)
- * - Field-specific filters
- * - Sorting
- * - Pagination
- * - Highlighting matches
- */
 export const searchController = async (req, res) => {
   try {
     const {
-      collection = "products", // default collection
+      collection = "products",
       query = "",
-      fields, // specific fields to search e.g. "name,description"
+      fields,
       sortBy = "createdAt",
       sortOrder = "desc",
       page = 1,
       limit = 10,
-      filters, // JSON string e.g. {"status":"active","category":"abaya"}
+      filters,
+      minPrice,
+      maxPrice,
+      size,
+      deal
     } = req.query;
 
-    // ✅ Decide which model to search
+    // ✅ Decide model
     let Model;
     switch (collection.toLowerCase()) {
-      case "users":
-        Model = User;
-        break;
-      case "orders":
-        Model = Order;
-        break;
+      // case "users": Model = User; break;
+      // case "orders": Model = Order; break;
       default:
-        Model = Product;
+        Model = Products;
     }
 
     // ✅ Build search condition
@@ -46,7 +37,6 @@ export const searchController = async (req, res) => {
           [f.trim()]: { $regex: query, $options: "i" },
         }));
       } else {
-        // Default: search common fields
         searchCondition = {
           $or: [
             { name: { $regex: query, $options: "i" } },
@@ -56,7 +46,24 @@ export const searchController = async (req, res) => {
       }
     }
 
-    // ✅ Apply extra filters
+    // ✅ Price filter
+    if (minPrice || maxPrice) {
+      searchCondition.price = {};
+      if (minPrice) searchCondition.price.$gte = Number(minPrice);
+      if (maxPrice) searchCondition.price.$lte = Number(maxPrice);
+    }
+
+    // ✅ Size filter
+    if (size) {
+      searchCondition.size = size;
+    }
+
+    // ✅ Deal filter
+    if (deal) {
+      searchCondition.deal = deal;
+    }
+
+    // ✅ Extra filters (JSON)
     if (filters) {
       const parsedFilters = JSON.parse(filters);
       searchCondition = { ...searchCondition, ...parsedFilters };
@@ -66,12 +73,12 @@ export const searchController = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // ✅ Query DB
-    const results = await Products.find(searchCondition)
+    const results = await Model.find(searchCondition)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await Products.countDocuments(searchCondition);
+    const total = await Model.countDocuments(searchCondition);
 
     // ✅ Highlight matches
     let highlightedResults = results.map((item) => {
