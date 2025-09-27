@@ -91,7 +91,7 @@ export const searchController = async (req, res) => {
         ) {
             highlightedItem[key] = highlightedItem[key].replace(
             new RegExp(query, "gi"),
-            (match) => `<mark>${match}</mark>`
+            (match) => `${match}`
             );
         }
         });
