@@ -125,3 +125,42 @@ export const removeFromWishlist = async (req, res) => {
     });
   }
 };
+
+// Merge guest wishlist with user's wishlist
+export const mergeWishlist = async (req, res) => {
+  try {
+    const { userId, products } = req.body;
+
+    if (!userId || !Array.isArray(products)) {
+      return res.status(400).json({ message: "Invalid request data" });
+    }
+
+    // Find user wishlist
+    let userWishlist = await Wishlist.findOne({ userId });
+
+    if (!userWishlist) {
+      // If user has no wishlist, create new with guest wishlist items
+      userWishlist = await Wishlist.create({ userId, products });
+    } else {
+      // Merge products (avoid duplicates in wishlist)
+      products.forEach((guestItem) => {
+        const exists = userWishlist.products.some(
+          (p) => p.productId.toString() === guestItem.productId
+        );
+
+        if (!exists) {
+          userWishlist.products.push(guestItem); // add only if not already in wishlist
+        }
+      });
+
+      await userWishlist.save();
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Wishlist merged successfully", wishlist: userWishlist });
+  } catch (error) {
+    console.error("Merge Wishlist Error:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
