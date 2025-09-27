@@ -82,22 +82,23 @@ export const searchController = async (req, res) => {
 
     // ✅ Highlight matches
     let highlightedResults = results.map((item) => {
-      let highlightedItem = item.toObject();
-      if (query) {
+    let highlightedItem = item.toObject();
+    if (query) {
         Object.keys(highlightedItem).forEach((key) => {
-          if (
+        if (
             typeof highlightedItem[key] === "string" &&
             highlightedItem[key].toLowerCase().includes(query.toLowerCase())
-          ) {
+        ) {
             highlightedItem[key] = highlightedItem[key].replace(
-              new RegExp(query, "gi"),
-              (match) => `<mark>${match}</mark>`
+            new RegExp(query, "gi"),
+            (match) => `<mark>${match}</mark>`
             );
-          }
+        }
         });
-      }
-      return highlightedItem;
+    }
+    return highlightedItem;
     });
+
 
     res.json({
       success: true,
