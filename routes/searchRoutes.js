@@ -3,6 +3,6 @@ import { searchController } from '../controller/searchController.js';
 
 const app = express();
 
-app.post('/', searchController);
+app.get('/', searchController);
 
 export default app;
