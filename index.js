@@ -9,6 +9,7 @@ import adminAuthentication from './routes/admin_auth_routes.js';
 import allProductsRoutes from './routes/AllProducts.routes.js';
 import CartRoutes from './routes/cart_routes.js';
 import WishListRoutes from './routes/wishlist.route.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 import cookieParser from 'cookie-parser';
 
@@ -60,6 +61,8 @@ app.use('/api/user/auth', userAuthentication);
 app.use('/api/admin/auth', adminAuthentication);
 app.use('/api/cart', CartRoutes);
 app.use('/api/wishlist', WishListRoutes);
+
+app.use('/api/search', searchRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
