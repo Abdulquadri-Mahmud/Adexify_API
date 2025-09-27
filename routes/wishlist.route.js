@@ -1,5 +1,7 @@
 import express from 'express';
-import { addToWishList, getWishlist, mergeWishlist, removeFromWishlist } from '../controller/wsislist.controller.js';
+import { addToWishList, getWishlist, 
+    mergeWishlist, removeFromWishlist 
+} from '../controller/wsislist.controller.js';
 
 const app = express();
 

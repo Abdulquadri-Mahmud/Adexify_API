@@ -136,11 +136,11 @@ export const mergeWishlist = async (req, res) => {
     }
 
     // Find user wishlist
-    let userWishlist = await Wishlist.findOne({ userId });
+    let userWishlist = await WishList.findOne({ userId });
 
     if (!userWishlist) {
       // If user has no wishlist, create new with guest wishlist items
-      userWishlist = await Wishlist.create({ userId, products });
+      userWishlist = await WishList.create({ userId, products });
     } else {
       // Merge products (avoid duplicates in wishlist)
       products.forEach((guestItem) => {
