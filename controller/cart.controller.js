@@ -45,7 +45,7 @@ export const addToCart = async (req, res) => {
 // Get Cart
 export const getCart = async (req, res) => {
   try {
-    const { userId, cartToken } = req.body;
+    const { userId, cartToken } = req.query;
 
     let cart;
     if (userId) cart = await Cart.findOne({ userId });
