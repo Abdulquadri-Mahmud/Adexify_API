@@ -10,6 +10,7 @@ import allProductsRoutes from './routes/AllProducts.routes.js';
 import CartRoutes from './routes/cart_routes.js';
 import WishListRoutes from './routes/wishlist.route.js';
 import searchRoutes from './routes/searchRoutes.js';
+import CheckoutRoutes from './routes/checkoutRoutes.js';
 
 import cookieParser from 'cookie-parser';
 
@@ -63,6 +64,7 @@ app.use('/api/cart', CartRoutes);
 app.use('/api/wishlist', WishListRoutes);
 
 app.use('/api/search', searchRoutes);
+app.use('/api/checkout', CheckoutRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
