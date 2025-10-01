@@ -59,27 +59,29 @@ export const getCart = async (req, res) => {
   }
 };
 
-// Update Cart (quantity)
+// Update Cart (quantity or size)
 export const updateCartItem = async (req, res) => {
   try {
-    const { userId, cartToken, productId, selectedSize, quantity } = req.body;
+    const { userId, cartToken, productId, oldSize, newSize, quantity } = req.body;
 
-    let cart;
-    if (userId) cart = await Cart.findOne({ userId });
-    else cart = await Cart.findOne({ cartToken });
+    const cart = userId
+      ? await Cart.findOne({ userId })
+      : await Cart.findOne({ cartToken });
 
     if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
     const product = cart.products.find(
-      (p) => p.productId === productId && p.selectedSize === selectedSize
+      (p) => p.productId === productId && p.selectedSize === oldSize
     );
 
     if (!product) return res.status(404).json({ success: false, message: "Product not in cart" });
 
-    product.quantity = quantity;
-    await cart.save();
+    product.selectedSize = newSize;   // 🔑 update size
+    product.quantity = quantity;      // update quantity too
 
+    await cart.save();
     res.json({ success: true, cart });
+
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
