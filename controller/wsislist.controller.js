@@ -2,7 +2,8 @@
 import { v4 as uuidv4 } from "uuid";
 import Wishlist from "../model/wishlist.model.js";
 
-// Add to Cart
+// Add to /Wishlist";
+
 export const addToWishlist = async (req, res) => {
   try {
     const { userId, cartToken, product } = req.body;
@@ -10,10 +11,12 @@ export const addToWishlist = async (req, res) => {
     let token = cartToken || null;
     if (!userId && !token) token = uuidv4();
 
+    // Fetch cart/wishlist
     let cart;
     if (userId) cart = await Wishlist.findOne({ userId });
     else cart = await Wishlist.findOne({ cartToken: token });
 
+    // If no cart exists, create one
     if (!cart) {
       cart = new Wishlist({
         userId: userId || undefined,
@@ -21,20 +24,21 @@ export const addToWishlist = async (req, res) => {
         products: [product],
       });
     } else {
-      const existingIndex = Wishlist.products.findIndex(
+      // Check if product already exists
+      const existingIndex = cart.products.findIndex(
         (p) =>
           p.productId === product.productId &&
           p.selectedSize === product.selectedSize
       );
 
       if (existingIndex >= 0) {
-        Wishlist.products[existingIndex].quantity += product.quantity || 1;
+        cart.products[existingIndex].quantity += product.quantity || 1;
       } else {
-        Wishlist.products.push(product);
+        cart.products.push(product);
       }
     }
 
-    await Wishlist.save();
+    await cart.save();
 
     res.json({ success: true, cart, cartToken: token });
   } catch (err) {
@@ -64,22 +68,29 @@ export const removeWishlistItem = async (req, res) => {
   try {
     const { userId, cartToken, productId, selectedSize } = req.body;
 
+    // Find wishlist by userId or guest token
     let cart;
     if (userId) cart = await Wishlist.findOne({ userId });
     else cart = await Wishlist.findOne({ cartToken });
 
-    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+    if (!cart) {
+      return res.status(404).json({ success: false, message: "Wishlist not found" });
+    }
 
-    Wishlist.products = Wishlist.products.filter(
-      (p) => !(p.productId === productId && p.selectedSize === selectedSize)
+    // Filter out the product
+    cart.products = cart.products.filter(
+      (p) => !(p.productId.toString() === productId && p.selectedSize === selectedSize)
     );
 
-    await Wishlist.save();
-    res.json({ success: true, cart });
+    // Save changes
+    await cart.save();
+
+    res.json({ success: true, wishlist: cart });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 // Merge Guest Cart into User Cart
 export const mergeGuestWishlist = async (req, res) => {
