@@ -21,7 +21,7 @@ const CartSchema = new mongoose.Schema(
          type: String, required: true 
       },
         stock: {
-         type: Number, required: true 
+         type: Number, required: false 
       },
         price: {
          type: Number, required: true 
@@ -33,7 +33,7 @@ const CartSchema = new mongoose.Schema(
          type: Number 
       },
         deal: {
-         type: String, required: true 
+         type: String, required: false 
       },
       category: {
          type: String, required: true 
