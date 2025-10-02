@@ -11,6 +11,7 @@ import CartRoutes from './routes/cart_routes.js';
 import WishListRoutes from './routes/wishlist.route.js';
 import searchRoutes from './routes/searchRoutes.js';
 import CheckoutRoutes from './routes/checkoutRoutes.js';
+import productViewRoutes from './routes/products.view.routes.js';
 
 import cookieParser from 'cookie-parser';
 
@@ -62,6 +63,8 @@ app.use('/api/user/auth', userAuthentication);
 app.use('/api/admin/auth', adminAuthentication);
 app.use('/api/cart', CartRoutes);
 app.use('/api/wishlist', WishListRoutes);
+
+app.use("/api/product-views", productViewRoutes);
 
 app.use('/api/search', searchRoutes);
 app.use('/api/checkout', CheckoutRoutes);

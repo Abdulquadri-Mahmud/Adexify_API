@@ -1,166 +1,119 @@
-import mongoose from "mongoose";
-import User from "../model/user_model.js";
-import WishList from "../model/wishlist.model.js";
+// controllers/cartController.js
+import { v4 as uuidv4 } from "uuid";
+import wishlistModel from "../model/wishlist.model.js";
 
-// ==================== Add to Cart ====================
-export const addToWishList = async (req, res) => {
-  const { userId, product } = req.body;
-
-  // Validate input
-  if (!userId || !product || !product.productId) {
-    return res.status(400).json({ success: false, message: "Missing required fields" });
-  }
-
-  // Check if user exists
-  const findUser = await User.findById(userId);
-  if (!findUser) {
-    return res.status(404).json({ success: false, message: "User not found" });
-  }
-
+// Add to Cart
+export const addToWishlist = async (req, res) => {
   try {
-    let wishlist = await WishList.findOne({ userId });
+    const { userId, cartToken, product } = req.body;
 
-    if (!wishlist) {
-      // Create new wishlist
-      wishlist = new WishList({
-        userId: new mongoose.Types.ObjectId(userId),
+    let token = cartToken || null;
+    if (!userId && !token) token = uuidv4();
+
+    let cart;
+    if (userId) cart = await wishlistModel.findOne({ userId });
+    else cart = await wishlistModel.findOne({ cartToken: token });
+
+    if (!cart) {
+      cart = new Cart({
+        userId: userId || undefined,
+        cartToken: userId ? undefined : token,
         products: [product],
       });
     } else {
-      // Check if product already exists in wishlist
-      const alreadyExists = wishlist.products.some(
+      const existingIndex = wishlistModel.products.findIndex(
         (p) =>
           p.productId === product.productId &&
           p.selectedSize === product.selectedSize
       );
 
-      if (alreadyExists) {
-        return res.status(400).json({
-          success: false,
-          message: 'Product already exists in wishlist',
-        });
+      if (existingIndex >= 0) {
+        wishlistModel.products[existingIndex].quantity += product.quantity || 1;
+      } else {
+        wishlistModel.products.push(product);
       }
-
-      // Add product to wishlist
-      wishlist.products.push(product);
     }
 
-    const saved = await wishlist.save();
+    await wishlistModel.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Product added to wishlist',
-      wishlist: saved,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message,
-    });
-  }
-};
-
-// ==================== Get Wish List ====================
-export const getWishlist = async (req, res) => {
-  const { userId } = req.body;
-
-  try {
-    const wishlist = await WishList.findOne({ userId }).populate('userId', '-password -avatar');
-
-    if (!wishlist) return res.status(404).json({ success: false, message: "Wishlist not found" });
-
-    res.status(200).json({ success: true, wishlist });
+    res.json({ success: true, cart, cartToken: token });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Server error", error: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-
-// ==================== Remove From Wish List ====================
-export const removeFromWishlist = async (req, res) => {
-  const { userId, productId } = req.body;
-
+// Get Cart
+export const getWishlist = async (req, res) => {
   try {
-    // 1. Find the wishlist for the user
-    const wishlist = await WishList.findOne({ userId });
+    const { userId, cartToken } = req.query;
 
-    // 2. If not found, return 404
-    if (!wishlist) {
-      return res.status(404).json({
-        success: false,
-        message: "Wishlist not found",
-      });
-    }
+    let cart;
+    if (userId) cart = await wishlistModel.findOne({ userId });
+    else if (cartToken) cart = await wishlistModel.findOne({ cartToken });
 
-    // 3. Check if product exists in the wishlist
-    const initialLength = wishlist.products.length;
+    if (!cart) return res.json({ success: true, cart: null });
 
-    wishlist.products = wishlist.products.filter(
-      item => String(item.productId) !== String(productId)
+    res.json({ success: true, cart });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Delete item by productId + size
+export const removeWishlistItem = async (req, res) => {
+  try {
+    const { userId, cartToken, productId, selectedSize } = req.body;
+
+    let cart;
+    if (userId) cart = await wishlistModel.findOne({ userId });
+    else cart = await wishlistModel.findOne({ cartToken });
+
+    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+
+    wishlistModel.products = wishlistModel.products.filter(
+      (p) => !(p.productId === productId && p.selectedSize === selectedSize)
     );
 
-    // 4. If nothing was removed, the product was not in the wishlist
-    if (wishlist.products.length === initialLength) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found in wishlist",
-      });
-    }
-
-    // 5. Save the updated wishlist
-    const updated = await wishlist.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Item removed from wishlist",
-      wishlist: updated,
-    });
-
+    await wishlistModel.save();
+    res.json({ success: true, cart });
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: err.message,
-    });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// Merge guest wishlist with user's wishlist
-export const mergeWishlist = async (req, res) => {
+// Merge Guest Cart into User Cart
+export const mergeGuestWishlist = async (req, res) => {
   try {
-    const { userId, products } = req.body;
+    const { userId, cartToken } = req.body;
 
-    if (!userId || !Array.isArray(products)) {
-      return res.status(400).json({ message: "Invalid request data" });
+    const guestCart = await wishlistModel.findOne({ cartToken });
+    if (!guestCart) return res.json({ success: true, message: "No guest cart found" });
+
+    let userCart = await wishlistModel.findOne({ userId });
+
+    if (!userCart) {
+      guestwishlistModel.userId = userId;
+      guestwishlistModel.cartToken = undefined;
+      await guestwishlistModel.save();
+      return res.json({ success: true, cart: guestCart });
     }
 
-    // Find user wishlist
-    let userWishlist = await WishList.findOne({ userId });
+    guestwishlistModel.products.forEach((g) => {
+      const existingIndex = userwishlistModel.products.findIndex(
+        (p) => p.productId === g.productId && p.selectedSize === g.selectedSize
+      );
+      if (existingIndex >= 0) {
+        userwishlistModel.products[existingIndex].quantity += g.quantity;
+      } else {
+        userwishlistModel.products.push(g);
+      }
+    });
 
-    if (!userWishlist) {
-      // If user has no wishlist, create new with guest wishlist items
-      userWishlist = await WishList.create({ userId, products });
-    } else {
-      // Merge products (avoid duplicates in wishlist)
-      products.forEach((guestItem) => {
-        const exists = userWishlist.products.some(
-          (p) => p.productId.toString() === guestItem.productId
-        );
+    await userwishlistModel.save();
+    await guestwishlistModel.deleteOne();
 
-        if (!exists) {
-          userWishlist.products.push(guestItem); // add only if not already in wishlist
-        }
-      });
-
-      await userWishlist.save();
-    }
-
-    return res
-      .status(200)
-      .json({ message: "Wishlist merged successfully", wishlist: userWishlist });
-  } catch (error) {
-    console.error("Merge Wishlist Error:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    res.json({ success: true, cart: userCart });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
