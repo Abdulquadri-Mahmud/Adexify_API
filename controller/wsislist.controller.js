@@ -1,6 +1,6 @@
 // controllers/cartController.js
 import { v4 as uuidv4 } from "uuid";
-import wishlistModel from "../model/wishlist.model.js";
+import Wishlist from "../model/wishlist.model.js";
 
 // Add to Cart
 export const addToWishlist = async (req, res) => {
@@ -11,30 +11,30 @@ export const addToWishlist = async (req, res) => {
     if (!userId && !token) token = uuidv4();
 
     let cart;
-    if (userId) cart = await wishlistModel.findOne({ userId });
-    else cart = await wishlistModel.findOne({ cartToken: token });
+    if (userId) cart = await Wishlist.findOne({ userId });
+    else cart = await Wishlist.findOne({ cartToken: token });
 
     if (!cart) {
-      cart = new wishlistModel({
+      cart = new Wishlist({
         userId: userId || undefined,
         cartToken: userId ? undefined : token,
         products: [product],
       });
     } else {
-      const existingIndex = wishlistModel.products.findIndex(
+      const existingIndex = Wishlist.products.findIndex(
         (p) =>
           p.productId === product.productId &&
           p.selectedSize === product.selectedSize
       );
 
       if (existingIndex >= 0) {
-        wishlistModel.products[existingIndex].quantity += product.quantity || 1;
+        Wishlist.products[existingIndex].quantity += product.quantity || 1;
       } else {
-        wishlistModel.products.push(product);
+        Wishlist.products.push(product);
       }
     }
 
-    await wishlistModel.save();
+    await Wishlist.save();
 
     res.json({ success: true, cart, cartToken: token });
   } catch (err) {
@@ -48,8 +48,8 @@ export const getWishlist = async (req, res) => {
     const { userId, cartToken } = req.query;
 
     let cart;
-    if (userId) cart = await wishlistModel.findOne({ userId });
-    else if (cartToken) cart = await wishlistModel.findOne({ cartToken });
+    if (userId) cart = await Wishlist.findOne({ userId });
+    else if (cartToken) cart = await Wishlist.findOne({ cartToken });
 
     if (!cart) return res.json({ success: true, cart: null });
 
@@ -65,16 +65,16 @@ export const removeWishlistItem = async (req, res) => {
     const { userId, cartToken, productId, selectedSize } = req.body;
 
     let cart;
-    if (userId) cart = await wishlistModel.findOne({ userId });
-    else cart = await wishlistModel.findOne({ cartToken });
+    if (userId) cart = await Wishlist.findOne({ userId });
+    else cart = await Wishlist.findOne({ cartToken });
 
     if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
-    wishlistModel.products = wishlistModel.products.filter(
+    Wishlist.products = Wishlist.products.filter(
       (p) => !(p.productId === productId && p.selectedSize === selectedSize)
     );
 
-    await wishlistModel.save();
+    await Wishlist.save();
     res.json({ success: true, cart });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -86,10 +86,10 @@ export const mergeGuestWishlist = async (req, res) => {
   try {
     const { userId, cartToken } = req.body;
 
-    const guestWishlist = await wishlistModel.findOne({ cartToken });
+    const guestWishlist = await Wishlist.findOne({ cartToken });
     if (!guestCart) return res.json({ success: true, message: "No guest cart found" });
 
-    let userCart = await wishlistModel.findOne({ userId });
+    let userCart = await Wishlist.findOne({ userId });
 
     if (!userCart) {
       guestWishlist.userId = userId;
