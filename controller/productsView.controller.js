@@ -1,35 +1,36 @@
 // controllers/productsViewModelController.js
-
-import productsViewModel from "../model/products.view.model.js";
+import productsViewModel from "../model/products.view.model";
+import { v4 as uuidv4 } from "uuid"; // for generating unique cartToken for guests
 
 export const recordAndGetproductsViewModels = async (req, res) => {
   try {
-    const { productId, cartToken } = req.body;
-    const userId = req.user?._id; // assuming user is attached via auth middleware
+    let { productId, cartToken } = req.body;
+    const userId = req.user?._id || null; // optional if user is logged in
 
     if (!productId) {
       return res.status(400).json({ message: "productId is required" });
     }
 
-    // Check if this user/cart has already viewed today
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const alreadyViewed = await productsViewModel.findOne({
-      productId,
-      $or: [{ userId }, { cartToken }],
-      createdAt: { $gte: todayStart },
-    });
-
-    if (!alreadyViewed) {
-      // Create a new view record
-      await productsViewModel.create({ productId, userId, cartToken });
+    // If guest and no cartToken provided, generate one
+    if (!userId && !cartToken) {
+      cartToken = uuidv4();
     }
 
-    // Get total views
+    // Always create a view record for this visit
+    const newView = await productsViewModel.create({
+      productId,
+      userId,
+      cartToken,
+    });
+
+    // Count total views for this product
     const totalViews = await productsViewModel.countDocuments({ productId });
 
-    res.json({ productId, views: totalViews });
+    res.json({
+      productId,
+      views: totalViews,
+      cartToken: cartToken, // return to frontend so guest can reuse it
+    });
   } catch (err) {
     console.error("Error recording product view:", err);
     res.status(500).json({ message: "Server error" });
