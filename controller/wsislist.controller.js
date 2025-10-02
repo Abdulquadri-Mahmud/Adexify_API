@@ -15,7 +15,7 @@ export const addToWishlist = async (req, res) => {
     else cart = await wishlistModel.findOne({ cartToken: token });
 
     if (!cart) {
-      cart = new Cart({
+      cart = new wishlistModel({
         userId: userId || undefined,
         cartToken: userId ? undefined : token,
         products: [product],
@@ -86,31 +86,31 @@ export const mergeGuestWishlist = async (req, res) => {
   try {
     const { userId, cartToken } = req.body;
 
-    const guestCart = await wishlistModel.findOne({ cartToken });
+    const guestWishlist = await wishlistModel.findOne({ cartToken });
     if (!guestCart) return res.json({ success: true, message: "No guest cart found" });
 
     let userCart = await wishlistModel.findOne({ userId });
 
     if (!userCart) {
-      guestwishlistModel.userId = userId;
-      guestwishlistModel.cartToken = undefined;
-      await guestwishlistModel.save();
+      guestWishlist.userId = userId;
+      guestWishlist.cartToken = undefined;
+      await guestWishlist.save();
       return res.json({ success: true, cart: guestCart });
     }
 
-    guestwishlistModel.products.forEach((g) => {
-      const existingIndex = userwishlistModel.products.findIndex(
+    guestWishlist.products.forEach((g) => {
+      const existingIndex = guestWishlist.products.findIndex(
         (p) => p.productId === g.productId && p.selectedSize === g.selectedSize
       );
       if (existingIndex >= 0) {
-        userwishlistModel.products[existingIndex].quantity += g.quantity;
+        guestWishlist.products[existingIndex].quantity += g.quantity;
       } else {
-        userwishlistModel.products.push(g);
+        guestWishlist.products.push(g);
       }
     });
 
-    await userwishlistModel.save();
-    await guestwishlistModel.deleteOne();
+    await guestWishlist.save();
+    await guestWishlist.deleteOne();
 
     res.json({ success: true, cart: userCart });
   } catch (err) {
