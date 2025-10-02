@@ -1,6 +1,6 @@
 // controllers/productsViewModelController.js
-import productsViewModel from "../model/products.view.model";
 import { v4 as uuidv4 } from "uuid"; // for generating unique cartToken for guests
+import productsViewModel from "../model/products.view.model";
 
 export const recordAndGetproductsViewModels = async (req, res) => {
   try {
@@ -29,6 +29,7 @@ export const recordAndGetproductsViewModels = async (req, res) => {
     res.json({
       productId,
       views: totalViews,
+      newView,
       cartToken: cartToken, // return to frontend so guest can reuse it
     });
   } catch (err) {
