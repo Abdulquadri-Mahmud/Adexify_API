@@ -31,25 +31,25 @@ const WishlistSchema = new mongoose.Schema({
          type: String, required: false 
       },
       category: {
-         type: String, required: true 
+         type: String, required: false 
       },
         image: {
-         type: [String], required: true 
+         type: [String], required: false 
       },
         description: {
-         type: String, required: true 
+         type: String, required: false 
       },
         discountType: {
          type: String 
       },
         trackingId: {
-         type: String, required: true 
+         type: String, required: false 
       },
         size: {
-         type: [String], required: true 
+         type: [String], required: false 
       },
         gender: {
-         type: String, required: true 
+         type: String, required: false 
       },
         selectedSize: {
          type: String 
