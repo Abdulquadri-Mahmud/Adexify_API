@@ -126,37 +126,38 @@ export const clearCart = async (req, res) => {
 
 // Merge Guest Cart into User Cart
 export const mergeGuestCart = async (req, res) => {
+  const { userId, cartToken } = req.body;
+
+  if (!userId || !cartToken) return res.status(400).json({ success: false, message: "Missing fields" });
+
   try {
-    const { userId, cartToken } = req.body;
-
     const guestCart = await Cart.findOne({ cartToken });
-    if (!guestCart) return res.json({ success: true, message: "No guest cart found" });
+    const userCart = await Cart.findOne({ userId });
 
-    let userCart = await Cart.findOne({ userId });
+    if (!guestCart) return res.json({ success: true, cart: userCart });
 
-    if (!userCart) {
+    if (userCart) {
+      // Merge items
+      guestCart.products.forEach((item) => {
+        const existing = userCart.products.find((p) => p.productId.toString() === item.productId.toString());
+        if (existing) {
+          existing.quantity += item.quantity;
+        } else {
+          userCart.products.push(item);
+        }
+      });
+      await userCart.save();
+      await Cart.deleteOne({ cartToken }); // remove guest cart
+      return res.json({ success: true, cart: userCart });
+    } else {
+      // Assign guest cart to user
       guestCart.userId = userId;
-      guestCart.cartToken = undefined;
+      guestCart.cartToken = null; // optional
       await guestCart.save();
       return res.json({ success: true, cart: guestCart });
     }
-
-    guestCart.products.forEach((g) => {
-      const existingIndex = userCart.products.findIndex(
-        (p) => p.productId === g.productId && p.selectedSize === g.selectedSize
-      );
-      if (existingIndex >= 0) {
-        userCart.products[existingIndex].quantity += g.quantity;
-      } else {
-        userCart.products.push(g);
-      }
-    });
-
-    await userCart.save();
-    await guestCart.deleteOne();
-
-    res.json({ success: true, cart: userCart });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
