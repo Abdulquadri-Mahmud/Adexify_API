@@ -9,15 +9,54 @@ const WishlistSchema = new mongoose.Schema({
   },
   products: [
     {
-      productId: { type: String, required: true },
-      name: { type: String, required: true },
-      price: { type: Number, required: true },
-      image: { type: [String], required: true },
-      category: { type: String, required: true },
-      brand: { type: String },
-      gender: { type: String },
-      description: { type: String },
-      createdAt: { type: Date, default: Date.now },
+        productId: {
+         type: String, required: true 
+      },
+        name: {
+         type: String, required: true 
+      },
+        stock: {
+         type: Number, required: false 
+      },
+        price: {
+         type: Number, required: true 
+      },
+        discount: {
+         type: Number 
+      },
+        oldprice: {
+         type: Number 
+      },
+        deal: {
+         type: String, required: false 
+      },
+      category: {
+         type: String, required: true 
+      },
+        image: {
+         type: [String], required: true 
+      },
+        description: {
+         type: String, required: true 
+      },
+        discountType: {
+         type: String 
+      },
+        trackingId: {
+         type: String, required: true 
+      },
+        size: {
+         type: [String], required: true 
+      },
+        gender: {
+         type: String, required: true 
+      },
+        selectedSize: {
+         type: String 
+      },
+        quantity: {
+         type: Number, default: 1 
+      },
     },
   ],
 }, { timestamps: true });

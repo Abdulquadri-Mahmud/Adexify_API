@@ -48,7 +48,7 @@ const CartSchema = new mongoose.Schema(
          type: String 
       },
         trackingId: {
-         type: String, required: false 
+         type: String, required: true 
       },
         size: {
          type: [String], required: true 
