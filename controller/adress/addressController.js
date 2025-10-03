@@ -34,7 +34,7 @@ export const addAddress = async (req, res) => {
 // Get all addresses
 export const getAddresses = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.query;
     const user = await User.findById(userId).select("addresses");
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -48,7 +48,7 @@ export const getAddresses = async (req, res) => {
 // Update specific address
 export const updateAddress = async (req, res) => {
   try {
-    const { userId, addressId, ...updatedData } = req.body;
+    const { userId, addressId, ...updatedData } = req.query;
 
     // Build dynamic update object
     const updateFields = {};
@@ -73,7 +73,7 @@ export const updateAddress = async (req, res) => {
 // Delete address
 export const deleteAddress = async (req, res) => {
   try {
-    const { userId, addressId } = req.body;
+    const { userId, addressId } = req.query;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -107,7 +107,7 @@ export const deleteAddress = async (req, res) => {
 // Set default address
 export const setDefaultAddress = async (req, res) => {
   try {
-    const { userId, addressId } = req.body;
+    const { userId, addressId } = req.query;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -129,7 +129,7 @@ export const setDefaultAddress = async (req, res) => {
 // Get default address (used in checkout)
 export const getDefaultAddress = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.query;
 
     const user = await User.findById(userId).select("addresses");
     if (!user) return res.status(404).json({ message: "User not found" });
