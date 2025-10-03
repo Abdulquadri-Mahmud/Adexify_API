@@ -16,6 +16,9 @@ const addressSchema = new mongoose.Schema({
   postalCode: {
     type: String
   },
+  notes: {
+    type: String
+  },
   isDefault: {
     type: Boolean,
     default: false
