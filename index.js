@@ -12,6 +12,7 @@ import WishListRoutes from './routes/wishlist.route.js';
 import searchRoutes from './routes/searchRoutes.js';
 import CheckoutRoutes from './routes/checkoutRoutes.js';
 import productViewRoutes from './routes/products.view.routes.js';
+import addressRoutes from './routes/addressRoutes.js';
 
 import cookieParser from 'cookie-parser';
 
@@ -59,7 +60,10 @@ app.get("/",(req, res,) => {
 
 app.use('/api/all-products', allProductsRoutes);
 app.use('/api/products', productsRoutes);
+
 app.use('/api/user/auth', userAuthentication);
+app.use("/api/users", addressRoutes);
+
 app.use('/api/admin/auth', adminAuthentication);
 app.use('/api/cart', CartRoutes);
 app.use('/api/wishlist', WishListRoutes);

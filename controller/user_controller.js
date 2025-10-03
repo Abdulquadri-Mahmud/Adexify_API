@@ -16,7 +16,6 @@ export const signup = async (req, res, next) => {
         //     return next(errorHandler(400, 'Phone Number has been used by another user!'));
         // }
         
-        
         if (password.length <= 7) {
             return next(errorHandler(400, 'Please kindly choose a strong password! max(8)'));
         }
@@ -67,6 +66,26 @@ export const signin = async (req, res, next) => {
         next(error);
     }
 }
+// Get user by ID (from body)
+export const getUserById = async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required in body" });
+    }
+
+    const user = await User.findById(userId).select("-password -resetPasswordToken -resetPasswordExpires");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User fetched successfully", user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const signOut = async (req, res, next) => {
     try {
