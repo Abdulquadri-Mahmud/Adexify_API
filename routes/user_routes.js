@@ -12,7 +12,7 @@ app.get('/signout', signOut);
 
 app.get('/get-user', getUserById);
 
-app.patch('/update/:id', updateUser);
+app.patch('/update', updateUser);
 app.delete('/delete/:id', deleteAccount);
 app.get('/all-user', allUsers);
 app.post('/forgot-password', userForgotPassword);
