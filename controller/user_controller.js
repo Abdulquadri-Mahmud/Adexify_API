@@ -125,7 +125,7 @@ export const updateUser = async (req, res, next) => {
       { new: true }
     );
 
-    const { password: pass, ...rest } = updatedUser._doc;
+    const { password: pass,resetPasswordExpires: reset, resetPasswordToken:stp, ...rest } = updatedUser._doc;
     res.status(200).json(rest); // safe response without password
   } catch (error) {
     next(error);
