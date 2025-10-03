@@ -97,7 +97,7 @@ export const signOut = async (req, res, next) => {
 }
 
 export const updateUser = async (req, res, next) => {
-    const userID = req.params.id;
+    const {userId} = req.query;
 
     const { firstname, lastname, phone, email, password, address, avatar} = req.body;
 
