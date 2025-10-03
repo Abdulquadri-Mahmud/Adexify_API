@@ -102,8 +102,7 @@ export const updateUser = async (req, res, next) => {
     const { firstname, lastname, phone, email, password, address, avatar} = req.body;
 
     try {
-        const findUserId = await User.findById(userID);
-
+        const findUserId = await User.findById(userId);
         
         let userPassword = password;
         
@@ -116,7 +115,7 @@ export const updateUser = async (req, res, next) => {
             return;
         }
 
-        const updateUser = await User.findByIdAndUpdate(userID, {
+        const updateUser = await User.findByIdAndUpdate(userId, {
             $set: {
                 firstname, lastname, phone, email, userPassword, address, avatar
             }
