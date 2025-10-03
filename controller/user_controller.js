@@ -97,38 +97,40 @@ export const signOut = async (req, res, next) => {
 }
 
 export const updateUser = async (req, res, next) => {
-    const {userId} = req.query;
+  const { userId } = req.query;
+  const { firstname, lastname, phone, email, password, avatar } = req.body;
 
-    const { firstname, lastname, phone, email, password, address, avatar} = req.body;
+  try {
+    const findUser = await User.findById(userId);
+    if (!findUser) return next(errorHandler(404, "Account Not Found!"));
 
-    try {
-        const findUserId = await User.findById(userId);
-        
-        let userPassword = password;
-        
-        if (userPassword) {
-            userPassword = bcryptjs.hashSync(password, 10);
-        }
-        
-        if (!findUserId) {
-            next(errorHandler(404, 'Account Not Found!'));
-            return;
-        }
+    let hashedPassword = findUser.password; // keep old password if not updating
 
-        const updateUser = await User.findByIdAndUpdate(userId, {
-            $set: {
-                firstname, lastname, phone, email, userPassword, address, avatar
-            }
-        }, {new : true});
-
-        const {password: pass, ...rest} = updateUser._doc;
-        
-        res.status(200).json(updateUser);
-        
-    } catch (error) {
-        next(error)
+    if (password && password.trim() !== "") {
+      hashedPassword = bcryptjs.hashSync(password, 10);
     }
-}
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          firstname,
+          lastname,
+          phone,
+          email,
+          password: hashedPassword,
+          avatar,
+        },
+      },
+      { new: true }
+    );
+
+    const { password: pass, ...rest } = updatedUser._doc;
+    res.status(200).json(rest); // safe response without password
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const deleteAccount = async (req, res, next) => {
     const getUserParamsID = req.params.id;
