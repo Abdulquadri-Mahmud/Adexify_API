@@ -73,7 +73,7 @@ export const updateAddress = async (req, res) => {
 // Delete address
 export const deleteAddress = async (req, res) => {
   try {
-    const { userId, addressId } = req.query;
+    const { userId, addressId } = req.body;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -107,7 +107,7 @@ export const deleteAddress = async (req, res) => {
 // Set default address
 export const setDefaultAddress = async (req, res) => {
   try {
-    const { userId, addressId } = req.query;
+    const { userId, addressId } = req.body;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
