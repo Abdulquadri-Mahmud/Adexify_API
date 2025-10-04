@@ -4,7 +4,7 @@ import User from "../../model/user_model.js";
 // Add address (auto-set as default if first)
 export const addAddress = async (req, res) => {
   try {
-    const { userId, state, city, street, postalCode } = req.body;
+    const { userId, state, city, street, notes, postalCode } = req.body;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -13,6 +13,7 @@ export const addAddress = async (req, res) => {
       state,
       city,
       street,
+      notes,
       postalCode
     };
 
