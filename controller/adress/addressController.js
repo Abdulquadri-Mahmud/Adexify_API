@@ -129,7 +129,7 @@ export const setDefaultAddress = async (req, res) => {
 // Get default address (used in checkout)
 export const getDefaultAddress = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId } = req.body;
 
     const user = await User.findById(userId).select("addresses");
     if (!user) return res.status(404).json({ message: "User not found" });
