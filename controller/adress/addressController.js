@@ -49,7 +49,7 @@ export const getAddresses = async (req, res) => {
 // Update specific address
 export const updateAddress = async (req, res) => {
   try {
-    const { userId, addressId, ...updatedData } = req.query;
+    const { userId, addressId, ...updatedData } = req.body;
 
     // Build dynamic update object
     const updateFields = {};
