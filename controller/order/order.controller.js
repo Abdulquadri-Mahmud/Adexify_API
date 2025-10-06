@@ -1,14 +1,18 @@
-import fetch from "node-fetch"; // Paystack API call
+import fetch from "node-fetch";
 import dotenv from "dotenv";
 import Order from "../../model/order/order.model.js";
+
 dotenv.config();
 
-//Helper to generate unique transaction reference
-const generateTransactionRef = () => `REF_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+// ==============================
+// Helper: Generate unique transaction reference
+// ==============================
+const generateTransactionRef = () =>
+  `REF_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
-// ==========================
+// ==============================
 // CREATE ORDER CONTROLLER
-// ==========================
+// ==============================
 export const createOrder = async (req, res) => {
   try {
     const {
@@ -18,19 +22,18 @@ export const createOrder = async (req, res) => {
       items,
       paymentMethod,
       total,
-      deliveryFee,
-      orderStatus,
-      paymentStatus,
+      deliveryFee = 0,
     } = req.body;
 
-    // Validate required fields
+    // 1. Basic validation
     if (!userId || !items || items.length === 0) {
       return res.status(400).json({ message: "Missing user or items data" });
     }
 
-    // Generate total amount in kobo (Paystack uses kobo)
-    const totalAmount = (total + (deliveryFee || 0)) * 100;
+    // 2. Generate total amount in kobo (Paystack uses kobo)
+    const totalAmount = (total + deliveryFee) * 100;
 
+    // 3. Prepare order data
     let orderData = {
       userId,
       userInfo,
@@ -39,34 +42,41 @@ export const createOrder = async (req, res) => {
       paymentMethod,
       total,
       deliveryFee,
-      orderStatus,
-      paymentStatus,
+      paymentStatus: "unpaid",
+      orderStatus: "pending",
     };
 
-    // ===================================================
-    // PAY ONLINE: Initialize Paystack Transaction
-    // ===================================================
+    // ==============================
+    // 💳 PAY ONLINE → Initialize Paystack Transaction
+    // ==============================
     if (paymentMethod === "Pay Online") {
       const transactionRef = generateTransactionRef();
 
-      const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userInfo.email,
-          amount: totalAmount,
-          reference: transactionRef,
-          callback_url: `${process.env.CLIENT_URL}/payment/verify`, // redirect after payment
-        }),
-      });
+      // Initialize Paystack transaction
+      const paystackResponse = await fetch(
+        "https://api.paystack.co/transaction/initialize",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userInfo.email,
+            amount: totalAmount,
+            reference: transactionRef,
+            callback_url: `${process.env.CLIENT_URL}/payment/verify?reference=${transactionRef}`,
+          }),
+        }
+      );
 
       const paystackData = await paystackResponse.json();
 
       if (!paystackData.status) {
-        return res.status(400).json({ message: "Paystack initialization failed" });
+        return res.status(400).json({
+          message: "Paystack initialization failed",
+          error: paystackData.message,
+        });
       }
 
       // Attach Paystack details to order
@@ -75,29 +85,29 @@ export const createOrder = async (req, res) => {
       orderData.paymentStatus = "unpaid";
     }
 
-    // ===================================================
-    // SAVE ORDER TO DATABASE
-    // ===================================================
+    // ==============================
+    // 4. SAVE ORDER TO DATABASE
+    // ==============================
     const newOrder = await Order.create(orderData);
 
-    // If payment method is online, send URL for redirection
+    // 5. If payment method is Pay Online, return Paystack redirect URL
     if (paymentMethod === "Pay Online") {
       return res.status(201).json({
         success: true,
-        message: "Order created. Redirect to Paystack.",
+        message: "Order created successfully. Redirect to Paystack.",
         paymentUrl: newOrder.paymentUrl,
         order: newOrder,
       });
     }
 
-    // Otherwise (Pay on Delivery), mark as pending
+    // 6. Otherwise (Pay on Delivery)
     return res.status(201).json({
       success: true,
-      message: "Order placed successfully.",
+      message: "Order placed successfully (Cash on Delivery).",
       order: newOrder,
     });
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error("❌ Error creating order:", error);
     res.status(500).json({
       success: false,
       message: "Server error while creating order",
@@ -106,18 +116,21 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// ==========================
+// ==============================
 // VERIFY PAYMENT CONTROLLER
-// ==========================
+// ==============================
 export const verifyPaystackPayment = async (req, res) => {
   const { reference } = req.query;
 
   try {
+    // 1. Verify transaction with Paystack API
     const verifyResponse = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         method: "GET",
-        headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
       }
     );
 
@@ -127,10 +140,19 @@ export const verifyPaystackPayment = async (req, res) => {
       return res.status(400).json({ message: "Verification failed" });
     }
 
-    // Update order after payment success
+    // 2. Check if transaction was successful
+    if (result.data.status !== "success") {
+      return res.status(400).json({ message: "Payment not successful yet" });
+    }
+
+    // 3. Update order payment + status
     const updatedOrder = await Order.findOneAndUpdate(
       { transactionRef: reference },
-      { paymentStatus: "paid", orderStatus: "processing" },
+      {
+        paymentStatus: "paid",
+        orderStatus: "processing",
+        paymentVerifiedAt: new Date(),
+      },
       { new: true }
     );
 
@@ -138,6 +160,7 @@ export const verifyPaystackPayment = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // 4. Return updated order
     res.status(200).json({
       success: true,
       message: "Payment verified successfully",
