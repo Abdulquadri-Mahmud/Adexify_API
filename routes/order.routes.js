@@ -2,7 +2,8 @@ import express from 'express';
 import {
     createOrder,
     getUserOrders,
-    verifyPaystackPayment
+    verifyPaystackPayment,
+    getSingleOrder
 } from '../controller/order/order.controller.js';
 
 import { paystackWebhook } from '../controller/order/paystackWebhook.controller.js';
