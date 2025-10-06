@@ -123,7 +123,7 @@ export const verifyPaystackPayment = async (req, res) => {
   const { reference } = req.query;
 
   try {
-    // 1. Verify transaction with Paystack API
+    // 1️⃣ Verify transaction with Paystack API
     const verifyResponse = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -140,12 +140,12 @@ export const verifyPaystackPayment = async (req, res) => {
       return res.status(400).json({ message: "Verification failed" });
     }
 
-    // 2. Check if transaction was successful
+    // 2️⃣ Check if payment was successful
     if (result.data.status !== "success") {
       return res.status(400).json({ message: "Payment not successful yet" });
     }
 
-    // 3. Update order payment + status
+    // 3️⃣ Update order payment + status
     const updatedOrder = await Order.findOneAndUpdate(
       { transactionRef: reference },
       {
@@ -160,14 +160,39 @@ export const verifyPaystackPayment = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // 4. Return updated order
+    // 4️⃣ Deduct stock for each product purchased
+    for (const item of updatedOrder.items) {
+      try {
+        const product = await Product.findById(item.productId);
+
+        if (!product) {
+          console.warn(`⚠️ Product not found for ID: ${item.productId}`);
+          continue;
+        }
+
+        // Make sure there’s enough stock before deducting
+        if (product.stocks < item.quantity) {
+          console.warn(
+            `⚠️ Not enough stock for ${product.name}. Current: ${product.stocks}, Ordered: ${item.quantity}`
+          );
+          continue;
+        }
+
+        product.stocks -= item.quantity;
+        await product.save();
+      } catch (err) {
+        console.error("❌ Error updating product stock:", err.message);
+      }
+    }
+
+    // 5️⃣ Return successful response
     res.status(200).json({
       success: true,
-      message: "Payment verified successfully",
+      message: "Payment verified and order updated successfully",
       order: updatedOrder,
     });
   } catch (error) {
-    console.error("Paystack verification error:", error);
+    console.error("❌ Paystack verification error:", error);
     res.status(500).json({
       success: false,
       message: "Payment verification failed",
@@ -175,7 +200,6 @@ export const verifyPaystackPayment = async (req, res) => {
     });
   }
 };
-
 
 // ==========================
 // GET USER ORDERS CONTROLLER
