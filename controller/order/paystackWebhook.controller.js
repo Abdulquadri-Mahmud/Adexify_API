@@ -1,6 +1,7 @@
 // controllers/order/paystackWebhook.controller.js
 import crypto from "crypto";
 import Order from "../../model/order/order.model.js";
+import Product from "../../model/product/product.model.js"; // ✅ Import Product model
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -54,6 +55,18 @@ export const paystackWebhook = async (req, res) => {
       }
 
       console.log(`✅ Order ${order._id} updated successfully via webhook.`);
+
+      // Step 6️⃣: Decrease product stock quantities after successful payment
+      try {
+        for (const item of order.items) {
+          await Product.findByIdAndUpdate(item.productId, {
+            $inc: { stock: -item.quantity },
+          });
+        }
+        console.log("📦 Product stock quantities updated successfully.");
+      } catch (stockError) {
+        console.error("⚠️ Error updating product stock:", stockError);
+      }
 
       // Step 5️⃣: Return success to Paystack (must respond with 200)
       return res.status(200).json({ success: true, message: "Webhook processed" });
