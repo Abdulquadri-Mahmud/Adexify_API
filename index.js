@@ -13,6 +13,7 @@ import searchRoutes from './routes/searchRoutes.js';
 import CheckoutRoutes from './routes/checkoutRoutes.js';
 import productViewRoutes from './routes/products.view.routes.js';
 import addressRoutes from './routes/addressRoutes.js';
+import orderRoutes from './routes/order.routes.js';
 
 import cookieParser from 'cookie-parser';
 
@@ -72,6 +73,8 @@ app.use("/api/product-views", productViewRoutes);
 
 app.use('/api/search', searchRoutes);
 app.use('/api/checkout', CheckoutRoutes);
+// Order API
+app.use("/api/orders", orderRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
