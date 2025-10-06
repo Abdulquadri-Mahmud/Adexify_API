@@ -12,6 +12,7 @@ const app = express();
 // Create new order
 app.post("/create", createOrder);
 app.get("/user", getUserOrders);
+app.get("/order", getSingleOrder);
 
 // Verify Paystack payment
 app.get("/verify", verifyPaystackPayment);

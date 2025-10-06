@@ -208,3 +208,43 @@ export const getUserOrders = async (req, res) => {
     });
   }
 };
+
+// ==========================================
+// 📦 Get Single Order (by Query) – Konga Style
+// ==========================================
+export const getSingleOrder = async (req, res) => {
+  try {
+    const { orderId, userId } = req.query;
+
+    if (!orderId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing orderId or userId in query",
+      });
+    }
+
+    // Find order that matches both ID and user
+    const order = await Order.findOne({ _id: orderId, userId })
+      .populate("userId", "firstname lastname email")
+      .populate("items.product", "name price image");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found or doesn't belong to this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Error fetching single order:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch single order",
+      error: error.message,
+    });
+  }
+};
