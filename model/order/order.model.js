@@ -2,14 +2,18 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    // Reference to user placing the order
+    orderId: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    // Embedded user info (snapshot at time of order)
     userInfo: {
       firstname: String,
       lastname: String,
@@ -17,35 +21,28 @@ const orderSchema = new mongoose.Schema(
       phone: String,
     },
 
-    // Shipping / Delivery address
     address: {
-      addressId: {
-        type: mongoose.Schema.Types.ObjectId,
-      },
+      addressId: mongoose.Schema.Types.ObjectId,
       street: String,
       city: String,
       state: String,
       postalCode: String,
       type: { type: String, default: "Home" },
-      notes: String, // also used as delivery/order notes
+      notes: String,
     },
 
-    // Items purchased
     items: [
       {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-        },
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
         name: String,
         price: Number,
+        image: String,
         quantity: Number,
         selectedSize: String,
         selectedColor: String,
       },
     ],
 
-    // Payment information
     paymentMethod: {
       type: String,
       enum: ["Pay Online", "Pay on Delivery"],
@@ -57,20 +54,16 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
 
-    // Order processing state
     orderStatus: {
       type: String,
       enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
       default: "pending",
     },
 
-    // Computed totals
     total: { type: Number, required: true },
     deliveryFee: { type: Number, default: 0 },
-
-    // Paystack Transaction reference
     transactionRef: String,
-    paymentUrl: String, // Paystack redirect URL for online payments
+    paymentUrl: String,
   },
   { timestamps: true }
 );

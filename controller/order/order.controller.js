@@ -13,6 +13,16 @@ const generateTransactionRef = () =>
 // ==============================
 // CREATE ORDER CONTROLLER
 // ==============================
+
+function generateOrderId() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let id = "";
+  for (let i = 0; i < 8; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
 export const createOrder = async (req, res) => {
   try {
     const {
@@ -33,8 +43,11 @@ export const createOrder = async (req, res) => {
     // 2. Generate total amount in kobo (Paystack uses kobo)
     const totalAmount = (total + deliveryFee) * 100;
 
+    const orderId = generateOrderId();
+
     // 3. Prepare order data
     let orderData = {
+      orderId,
       userId,
       userInfo,
       address,
