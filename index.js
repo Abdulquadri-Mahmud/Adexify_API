@@ -10,7 +10,6 @@ import allProductsRoutes from './routes/AllProducts.routes.js';
 import CartRoutes from './routes/cart_routes.js';
 import WishListRoutes from './routes/wishlist.route.js';
 import searchRoutes from './routes/searchRoutes.js';
-import CheckoutRoutes from './routes/checkoutRoutes.js';
 import productViewRoutes from './routes/products.view.routes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import orderRoutes from './routes/order.routes.js';
@@ -72,7 +71,6 @@ app.use('/api/wishlist', WishListRoutes);
 app.use("/api/product-views", productViewRoutes);
 
 app.use('/api/search', searchRoutes);
-app.use('/api/checkout', CheckoutRoutes);
 // Order API
 app.use("/api/orders", orderRoutes);
 
