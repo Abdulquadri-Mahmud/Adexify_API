@@ -58,6 +58,8 @@ app.get("/",(req, res,) => {
     res.send('Hello World');
 });
 
+app.use("/api/orders/webhook", express.raw({ type: "application/json" }), orderRoutes);
+
 app.use('/api/all-products', allProductsRoutes);
 app.use('/api/products', productsRoutes);
 
