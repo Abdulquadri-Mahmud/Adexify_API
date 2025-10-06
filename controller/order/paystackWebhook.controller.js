@@ -1,8 +1,8 @@
 // controllers/order/paystackWebhook.controller.js
 import crypto from "crypto";
 import Order from "../../model/order/order.model.js";
-import Product from "../../model/product/product.model.js"; // ✅ Import Product model
 import dotenv from "dotenv";
+import Products from "../../model/products_models.js";
 dotenv.config();
 
 /**
@@ -59,7 +59,7 @@ export const paystackWebhook = async (req, res) => {
       // Step 6️⃣: Decrease product stock quantities after successful payment
       try {
         for (const item of order.items) {
-          await Product.findByIdAndUpdate(item.productId, {
+          await Products.findByIdAndUpdate(item.productId, {
             $inc: { stock: -item.quantity },
           });
         }
